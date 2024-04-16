@@ -7,6 +7,7 @@ import (
 	"github.com/fogleman/gg"
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
+	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/lifecycle"
 	"golang.org/x/mobile/event/paint"
 	"golang.org/x/mobile/event/size"
@@ -54,8 +55,11 @@ func main() {
 					panic(err)
 				}
 				pixBuffer = screenBuffer.RGBA()
+			case key.Event:
+				draw(pixBuffer, e.String())
+				w.Upload(image.Pt(0, 0), screenBuffer, sizeEvent.Bounds())
 			case paint.Event:
-				draw(pixBuffer)
+				draw(pixBuffer, "nothing")
 				w.Upload(image.Pt(0, 0), screenBuffer, sizeEvent.Bounds())
 			case lifecycle.Event:
 				frameNumber++
@@ -69,14 +73,20 @@ func main() {
 	fmt.Println("end")
 }
 
-func draw(pixBuffer *image.RGBA) {
+func draw(pixBuffer *image.RGBA, words string) {
 	dc := gg.NewContextForRGBA(pixBuffer)
+	dc.Clear()
 
-	dc.DrawCircle(500, 500, 400)
-	dc.SetRGB(100.0/255.0, 200.0/255.0, 1)
-	dc.Fill()
+	start := 500.0
+	color := 100.0
+	for i := 0; i < 10; i++ {
+		dc.SetColor(image.White)
+		dc.DrawString(words, 10, 10)
+		dc.DrawCircle(500, start, 400)
+		dc.SetRGB(color/255.0, 100.0/255.0, 1)
+		dc.Fill()
 
-	dc.DrawCircle(500, 900, 400)
-	dc.SetRGB(200.0/255.0, 200.0/255.0, 0.5)
-	dc.Fill()
+		start += 10
+		color += 10
+	}
 }
