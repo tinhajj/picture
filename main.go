@@ -68,6 +68,7 @@ func main() {
 					return
 				}
 			}
+			w.Publish()
 		}
 	})
 	fmt.Println("end")
