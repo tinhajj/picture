@@ -109,11 +109,11 @@ func regionhit(x, y, w, h float64) bool {
 }
 
 func button(gtx *gg.Context, x, y, w, h float64) {
-	gtx.SetColor(color.White)
+	gtx.SetRGBA(1, 1, 1, 0.9)
 	if regionhit(x, y, w, h) {
 		gtx.SetColor(color.RGBA{0, 255, 0, 255})
 	}
-	gtx.DrawRectangle(x, y, w, h)
+	gtx.DrawRoundedRectangle(x, y, w, h, 1)
 	gtx.Fill()
 }
 
