@@ -9,6 +9,7 @@ import (
 	"github.com/golang/freetype/truetype"
 	"golang.org/x/exp/shiny/driver"
 	"golang.org/x/exp/shiny/screen"
+	"golang.org/x/image/font"
 	"golang.org/x/image/font/gofont/goregular"
 	"golang.org/x/mobile/event/key"
 	"golang.org/x/mobile/event/lifecycle"
@@ -30,8 +31,16 @@ type state struct {
 	mousedown  bool
 }
 
+var face font.Face
+
 func main() {
 	fmt.Println("start")
+
+	f, err := truetype.Parse(goregular.TTF)
+	if err != nil {
+		panic("what")
+	}
+	face = truetype.NewFace(f, &truetype.Options{Size: 1300.0, DPI: 227.0, Hinting: font.HintingFull, SubPixelsX: 0, SubPixelsY: 0})
 
 	driver.Main(func(s screen.Screen) {
 		w, err := s.NewWindow(&screen.NewWindowOptions{
@@ -70,7 +79,6 @@ func main() {
 				}
 				pixBuffer = screenBuffer.RGBA()
 			case mouse.Event:
-				fmt.Println(e)
 				uistate.mousex = float64(e.X)
 				uistate.mousey = float64(e.Y)
 			case key.Event:
@@ -91,6 +99,7 @@ func main() {
 			}
 			button(gtx, 10, 10, 100, 50)
 			button(gtx, 300, 100, 100, 50)
+			text(gtx, "hello", 250, 110)
 			publish = true
 			if publish {
 				w.Upload(image.Pt(0, 0), screenBuffer, sizeEvent.Bounds())
@@ -108,6 +117,10 @@ func regionhit(x, y, w, h float64) bool {
 	return true
 }
 
+func text(gtx *gg.Context, s string, x float64, y float64) {
+	gtx.DrawString(s, x, y)
+}
+
 func button(gtx *gg.Context, x, y, w, h float64) {
 	gtx.SetRGBA(1, 1, 1, 0.9)
 	if regionhit(x, y, w, h) {
@@ -120,27 +133,6 @@ func button(gtx *gg.Context, x, y, w, h float64) {
 func newContext(pixBuffer *image.RGBA) *gg.Context {
 	dc := gg.NewContextForRGBA(pixBuffer)
 	dc.Clear()
-	return dc
-}
-
-func draw(pixBuffer *image.RGBA, words string) {
-	dc := gg.NewContextForRGBA(pixBuffer)
-	dc.Clear()
-	f, _ := truetype.Parse(goregular.TTF)
-	face := truetype.NewFace(f, &truetype.Options{Size: 40})
 	dc.SetFontFace(face)
-
-	start := 500.0
-	color := 100.0
-	for i := 0; i < 10; i++ {
-		dc.SetColor(image.White)
-		dc.DrawString(words, 10, 50)
-		//dc.DrawStringWrapped(words, 10, 50, 100, 50, 50, 10.0, gg.AlignLeft)
-		dc.DrawCircle(500, start, 400)
-		dc.SetRGB(color/255.0, 100.0/255.0, 1)
-		dc.Fill()
-
-		start += 10
-		color += 10
-	}
+	return dc
 }
